@@ -1,0 +1,24 @@
+server:
+  context-path: /emall
+  session:
+    timeout: 7200
+
+spring:
+  jackson:
+    default-property-inclusion: NON_NULL
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  profiles:
+    active: dev
+  http:
+    multipart:
+      maxFileSize: 10MB
+
+
+logging:
+  config: classpath:logback.xml
+
+
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/emall/*.xml

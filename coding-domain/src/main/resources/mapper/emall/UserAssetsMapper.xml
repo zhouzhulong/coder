@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.honey.domain.emall.dao.mapper.UserAssetsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.honey.domain.emall.dao.entity.UserAssetsDO">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="total_assets" property="totalAssets" />
+        <result column="shop_assets" property="shopAssets" />
+        <result column="friend_assets" property="friendAssets" />
+        <result column="wait_assets" property="waitAssets" />
+        <result column="used_assets" property="usedAssets" />
+        <result column="update_time" property="updateTime" />
+        <result column="share_waits_assets" property="shareWaitsAssets" />
+        <result column="share_assets" property="shareAssets" />
+        <result column="friend_waits_assets" property="friendWaitsAssets" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, total_assets, shop_assets, friend_assets, wait_assets, used_assets, update_time, share_waits_assets, share_assets, friend_waits_assets
+    </sql>
+
+</mapper>
