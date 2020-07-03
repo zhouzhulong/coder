@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@MapperScan("com.darling.domain.**.dao")
+@MapperScan("com.honey.domain.**.dao")
 public class MybatisPlusConfig {
 
     /**

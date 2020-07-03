@@ -12,10 +12,14 @@ import com.ll.vbox.vboxservice.adapter.service.WSGWAdapter;
 import com.ll.vbox.vboxservice.adapter.wsgwmodel.WsgwResult;
 import com.ll.vbox.vboxservice.adapter.wsgwmodel.WsgwToken;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,37 +40,46 @@ public class EmallRechargeService {
     private String tokenPath = "/oauth2/oauth/token";
 
     private WsgwToken token;
-    public WsgwResult recharge(RechargeInDTO request) throws IOException {
-        if(token == null){
-         token = WSGWAdapter.getAccessToken(request.getLicense(), wsgwHost + tokenPath);
+
+    public List<Object> recharge(RechargeInDTO request) throws IOException {
+        String bizId = genBizId();
+        if (token == null) {
+            token = WSGWAdapter.getAccessToken(bizId, wsgwHost + tokenPath);
         }
-        log.info("token:{}", JSON.toJSONString(token));
+        log.info("bizId :{},token:{}", bizId, JSON.toJSONString(token));
         //直接充值
         String serialNo = UUID.randomUUID().toString().replaceAll("-", "");
-        RechargeRequest rechargeRequest = RechargeRequest.builder().bussId(request.getLicense()).license(request.getLicense())
+        RechargeRequest rechargeRequest = RechargeRequest.builder().bussId(bizId).license(request.getLicense())
                 .sendValue(request.getMoney())
                 .serialNo(serialNo)
                 .userId(request.getUserId()).build();
         EncryptionRequest encryptionRequest = new EncryptionRequest();
         encryptionRequest.setFeierData(rechargeRequest);
-        String resp = WSGWAdapter.invokeBusiRequest(request.getLicense(), wsgwHost + rechargePath, JSON.toJSONString(encryptionRequest), token.getAccess_token(), serialNo);
-        EncryptionResponse encryptionResponse = JSON.parseObject(resp, EncryptionResponse.class);
-        WsgwResult<RechargeResponse> wsgwResult = JSON.parseObject(JSON.toJSONString(encryptionResponse.getFeierData()), WsgwResult.class);
-        if ("0".equals(wsgwResult.getCode())) {
-            RechargeResponse response = JSON.parseObject(JSON.toJSONString(wsgwResult.getData()), RechargeResponse.class);
-            String orderId = response.getOrderId();
-            UserBillDO userBillDO = new UserBillDO();
-            userBillDO.setUserId(request.getUserId());
-            userBillDO.setBillId(request.getLicense());
-            userBillDO.setType("5");
-            userBillDO.setTelno("");
-            userBillDO.setOrderId(orderId);
-            userBillDO.setMoney(Double.valueOf(request.getMoney()));
-            userBillDO.setStatus("2");
-            userBillDO.setDesc("手动充值");
+        UserBillDO userBillDO = new UserBillDO();
+        userBillDO.setUserId(request.getUserId());
+        userBillDO.setBillId(bizId);
+        userBillDO.setType("3");
+        userBillDO.setTelno("");
+        userBillDO.setMoney(Double.valueOf(request.getMoney()));
+        userBillDO.setStatus("2");
+        userBillDO.setDesc("手动充值 " + request.getLicense());
+        userBillDO.setOrderId("");
+        List<Object> result = Lists.newArrayList();
+        result.add(userBillDO);
+        try {
+            String resp = WSGWAdapter.invokeBusiRequest(bizId, wsgwHost + rechargePath, JSON.toJSONString(encryptionRequest), token.getAccess_token(), serialNo);
+            EncryptionResponse encryptionResponse = JSON.parseObject(resp, EncryptionResponse.class);
+            WsgwResult<RechargeResponse> wsgwResult = JSON.parseObject(JSON.toJSONString(encryptionResponse.getFeierData()), WsgwResult.class);
+            if ("0".equals(wsgwResult.getCode())) {
+                RechargeResponse response = JSON.parseObject(JSON.toJSONString(wsgwResult.getData()), RechargeResponse.class);
+                String orderId = response.getOrderId();
+                userBillDO.setOrderId(orderId);
+            }
+            result.add(wsgwResult);
+        } finally {
             userBillMapper.insert(userBillDO);
         }
-        return wsgwResult;
+        return result;
     }
 
     public WsgwResult queryRecharge(QueryRechargeStatusInDTO request) throws IOException {
@@ -76,13 +89,15 @@ public class EmallRechargeService {
         if (userBillDO == null) {
             throw new BusinessException();
         }
+        String serialNo = UUID.randomUUID().toString().replaceAll("-", "");
+
         WsgwToken token = WSGWAdapter.getAccessToken(request.getBizId(), wsgwHost + tokenPath);
         log.info("token:{}", JSON.toJSONString(token));
         QueryRechargeRequest queryRechargeRequest = new QueryRechargeRequest();
         queryRechargeRequest.setBussId(request.getBizId());
         EncryptionRequest encryptionRequest = new EncryptionRequest();
         encryptionRequest.setFeierData(queryRechargeRequest);
-        String resp = WSGWAdapter.invokeBusiRequest(request.getBizId(), wsgwHost + queryRechargePath, JSON.toJSONString(encryptionRequest), token.getAccess_token(), request.getBizId());
+        String resp = WSGWAdapter.invokeBusiRequest(request.getBizId(), wsgwHost + queryRechargePath, JSON.toJSONString(encryptionRequest), token.getAccess_token(), serialNo);
         EncryptionResponse encryptionResponse = JSON.parseObject(resp, EncryptionResponse.class);
         WsgwResult<RechargeResponse> wsgwResult = JSON.parseObject(JSON.toJSONString(encryptionResponse.getFeierData()), WsgwResult.class);
         if ("0".equals(wsgwResult.getCode())) {
@@ -93,5 +108,11 @@ public class EmallRechargeService {
             }
         }
         return wsgwResult;
+    }
+
+    private static String genBizId() {
+        Date day = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmssSSS");
+        return dateFormat.format(day);
     }
 }
