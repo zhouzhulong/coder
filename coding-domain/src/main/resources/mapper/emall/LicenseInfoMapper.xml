@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.honey.domain.emall.dao.mapper.LicenseInfoMapper">
+<mapper namespace="com.honey.domain.dao.LicenseInfoMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.honey.domain.emall.dao.entity.LicenseInfoDO">
+    <resultMap id="BaseResultMap" type="com.honey.domain.model.LicenseInfoDO">
         <id column="id" property="id" />
         <result column="license" property="license" />
         <result column="bill_id" property="billId" />

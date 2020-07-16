@@ -1,24 +1,32 @@
-server:
-  context-path: /emall
-  session:
-    timeout: 7200
-
 spring:
-  jackson:
-    default-property-inclusion: NON_NULL
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
   profiles:
-    active: dev
-  http:
+    active: dev #默认为开发环境
+  servlet:
     multipart:
-      maxFileSize: 10MB
+      enabled: true #开启文件上传
+      max-file-size: 10MB #限制文件上传大小为10M
 
+mybatis:
+  mapper-locations:
+    - classpath:dao/*.xml
+    - classpath*:com/**/mapper/*.xml
+
+aliyun:
+  oss:
+    endpoint: oss-cn-hangzhou.aliyuncs.com # oss对外服务的访问域名
+    accessKeyId: LTAI4FbyDP7g7RksoHJeikfo # 访问身份验证中用到用户标识
+    accessKeySecret: FzVwQAk7hFn9EFSB1trM7aI7vzI6p2 # 用户用于加密签名字符串和oss用来验证签名字符串的密钥
+    bucketName: hhhz-static-01 # oss的存储空间
+    policy:
+      expire: 300 # 签名有效期(S)
+    maxSize: 10 # 上传文件大小(M)
+    callback: http://127.0.0.1:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+    dir:
+      prefix: test/log/ # 上传文件夹路径前缀
 
 logging:
-  config: classpath:logback.xml
-
-
-
-mybatis-plus:
-  mapper-locations: classpath*:mapper/emall/*.xml
+  level:
+    root: info #日志配置DEBUG,INFO,WARN,ERROR
+    com.honey: debug
+#  file: demo_log.log #配置日志生成路径
+#  path: /var/logs #配置日志文件名称
