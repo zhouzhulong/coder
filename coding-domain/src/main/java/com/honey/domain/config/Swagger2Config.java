@@ -1,5 +1,6 @@
 package com.honey.domain.config;
 
+import com.github.xiaoymin.swaggerbootstrapui.annotations.EnableSwaggerBootstrapUI;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 @Configuration
 @EnableSwagger2
+@EnableSwaggerBootstrapUI
 public class Swagger2Config {
     @Bean
     public Docket createRestApi() {

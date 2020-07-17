@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -68,10 +69,10 @@ public class OssServiceImpl implements OssService {
             policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, maxSize);
             policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir);
             String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
-            byte[] binaryData = postPolicy.getBytes("utf-8");
+            byte[] binaryData = postPolicy.getBytes(StandardCharsets.UTF_8);
             String policy = BinaryUtil.toBase64String(binaryData);
             String signature = ossClient.calculatePostSignature(postPolicy);
-            String callbackData = BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes("utf-8"));
+            String callbackData = BinaryUtil.toBase64String(JSONUtil.parse(callback).toString().getBytes(StandardCharsets.UTF_8));
             // 返回结果
             result.setAccessKeyId(ossClient.getCredentialsProvider().getCredentials().getAccessKeyId());
             result.setPolicy(policy);

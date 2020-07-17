@@ -20,7 +20,7 @@ aliyun:
     policy:
       expire: 300 # 签名有效期(S)
     maxSize: 10 # 上传文件大小(M)
-    callback: http://127.0.0.1:8080/aliyun/oss/callback # 文件上传成功后的回调地址
+    callback: http://36.7.68.18:8080/aliyun/oss/callback # 文件上传成功后的回调地址
     dir:
       prefix: test/log/ # 上传文件夹路径前缀
 
