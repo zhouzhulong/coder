@@ -43,12 +43,12 @@ public class Tr {
     public String build() {
         StringBuilder stringBuilder = new StringBuilder();
         if (td != null) {
-            if (lastCol) {
-                stringBuilder.append("</tr><tr>");
-            }
             stringBuilder.append("<td rowspan='").append(td.getRowspan()).append("'>").append(td.getContent()).append("</td>");
         }
         if (trs != null) {
+            if (lastCol) {
+                stringBuilder.append("</tr><tr>");
+            }
             for (Tr tr : trs) {
                 stringBuilder.append(tr.build());
             }

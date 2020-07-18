@@ -7,6 +7,6 @@ import java.util.List;
  */
 public interface HtmlParseService {
 
-    public String parseTable(List<Object> objects, String tabelName, List<String> trHeadNames);
+    public String parseTable(List<?> objects, String tabelName, List<String> trHeadNames);
 
 }

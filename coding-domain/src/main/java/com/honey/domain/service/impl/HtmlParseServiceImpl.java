@@ -3,27 +3,36 @@ package com.honey.domain.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.honey.domain.bo.Table;
 import com.honey.domain.bo.Td;
 import com.honey.domain.bo.Tr;
 import com.honey.domain.service.HtmlParseService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author zlzhou
  */
+@Service
 public class HtmlParseServiceImpl implements HtmlParseService {
 
 
-    @Override
-    public String parseTable(List<Object> objects, String tabelName, List<String> trHeadNames) {
+    /**
+     * @param objects     原始对象列表
+     * @param tabelName   表的名字
+     * @param trHeadNames 表头字段列表
+     * @return
+     */
+    public String parseTable(List<?> objects, String tabelName, List<String> trHeadNames) {
         List<Tr> trs = Lists.newArrayList();
         for (Object object : objects) {
-            Tr tr = parseJsonObject(JSON.parseObject(JSON.toJSONString(object)));
-            calculateRowspan(tr, 1);
+            Tr tr = parseJsonObject(JSON.parseObject(JSON.toJSONString(object, SerializerFeature.WriteNullStringAsEmpty), Feature.OrderedField));
+            handleTrRowspan(tr);
+            handleTrTr(tr);
             trs.add(tr);
         }
         Table table = new Table();
@@ -35,8 +44,7 @@ public class HtmlParseServiceImpl implements HtmlParseService {
 
     private Tr parseJsonObject(JSONObject jsonObject) {
         Tr tr = new Tr();
-        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-            Object value = entry.getValue();
+        for (Object value : jsonObject.values()) {
             if (value instanceof JSONObject) {
                 tr.addTr(parseJsonObject((JSONObject) value));
             } else if (value instanceof JSONArray) {
@@ -49,37 +57,61 @@ public class HtmlParseServiceImpl implements HtmlParseService {
     }
 
     private Tr parseJsonArray(JSONArray jsonArray) {
-        Tr tr = new Tr();
+        Tr ptr = new Tr();
         for (int i = 0; i < jsonArray.size(); i++) {
+            Tr tr = new Tr();
             tr.addTrs(parseJsonObject(jsonArray.getJSONObject(i)).getTrs());
+            ptr.addTr(tr);
         }
-        return tr;
+        return ptr;
     }
 
-
-    private Integer calculateRowspan(Tr tr, Integer rowspan) {
-        if (tr.getTrs() != null && !tr.getTrs().isEmpty()) {
-            boolean lastCol = true;
+    private Integer caculateRowspan(Tr tr) {
+        int count = 0;
+        if (tr.getTrs() != null) {
             for (Tr sonTr : tr.getTrs()) {
                 if (sonTr.getTrs() != null && !sonTr.getTrs().isEmpty()) {
-                    rowspan = calculateRowspan(sonTr, rowspan);
-                    lastCol = false;
+                    count++;
                 }
             }
-            int i = 0;
+        }
+        return Math.max(count, 1);
+    }
+
+    private Integer handleTrRowspan(Tr tr) {
+        int trRowspan = caculateRowspan(tr);
+        if (tr.getTrs() != null && !tr.getTrs().isEmpty()) {
+            for (Tr sonTr : tr.getTrs()) {
+                if (sonTr.getTrs() != null && !sonTr.getTrs().isEmpty()) {
+                    trRowspan += handleTrRowspan(sonTr) - 1;
+                }
+            }
             if (tr.getTrs() != null) {
                 for (Tr sonTr : tr.getTrs()) {
                     if (sonTr.getTd() != null) {
-                        if (lastCol && i > 0) {
-                            sonTr.setLastCol(true);
-                        }
-                        sonTr.getTd().setRowspan(rowspan);
-                        i++;
+                        sonTr.getTd().setRowspan(trRowspan);
                     }
                 }
             }
-            rowspan += i - 1;
         }
-        return rowspan;
+        return trRowspan;
+    }
+
+    private void handleTrTr(Tr tr) {
+        int tempCount = 0;
+        if (tr.getTrs() == null) {
+            return;
+        }
+        for (Tr subTr : tr.getTrs()) {
+            handleTrTr(subTr);
+            if (subTr.getTrs() != null) {
+                tempCount++;
+            }
+        }
+        if (tempCount > 1 && tempCount == tr.getTrs().size()) {
+            for (int i = 1; i < tr.getTrs().size(); i++) {
+                tr.getTrs().get(i).setLastCol(true);
+            }
+        }
     }
 }
