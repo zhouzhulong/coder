@@ -3,7 +3,6 @@ package com.honey.domain.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.api.client.util.Lists;
 import com.honey.common.utils.HttpUtil;
 import com.honey.domain.bo.SemanticNode;
@@ -34,8 +33,8 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
             results.add(result);
             for (SemanticNode node : inputs) {
                 param.setInput_text(node.getInputText());
+                log.info("flowAnalysis inputText=" + node.getInputText());
                 String response = HttpUtil.doPost(flowAnalysisUrl, JSONObject.parseObject(JSONObject.toJSONString(param)));
-                log.info("flowAnalysis response=" + response);
                 JSONObject jsonObject = JSON.parseObject(response);
                 JSONArray directiveItems = jsonObject.getJSONObject("directive").getJSONArray("directive_items");
                 boolean isEnd = jsonObject.getBoolean("is_end");
@@ -44,12 +43,10 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
                     JSONObject item = directiveItems.getJSONObject(i);
                     outputText.append(item.getString("content"));
                 }
+                log.info("flowAnalysis outputText=" + outputText.toString());
                 node.setOutputText(outputText.toString());
                 node.setChildList(null);
                 result.add(node);
-                if (isEnd) {
-                    break;
-                }
             }
         }
         FlowAnalysisTestResult flowAnalysisTestResult = new FlowAnalysisTestResult();
@@ -57,14 +54,64 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
         return flowAnalysisTestResult;
     }
 
-    private List<List<SemanticNode>> buildInputPath(List<SemanticNode> nodes) {
+    private List<List<SemanticNode>> buildInputPath(List<SemanticNode> roots) {
+        List<List<SemanticNode>> treepaths = new ArrayList<>();
+        for (SemanticNode node : roots) {
+            List<SemanticNode> treepath = new ArrayList<>();
+            treepath.add(node);
+            buildInputPath(treepaths, treepath, node);
+        }
+        //处理|
         List<List<SemanticNode>> paths = new ArrayList<>();
-        for (SemanticNode node : nodes) {
-            List<SemanticNode> path = new ArrayList<>();
-            path.add(node);
-            buildInputPath(paths, path, node);
+        for (List<SemanticNode> nodes : treepaths) {
+            if (nodes.stream().anyMatch(node -> node.getInputText().contains("|"))) {
+                List<SemanticNode> tempNodes = new ArrayList<>();
+                List<List<SemanticNode>> tempPaths = new ArrayList<>();
+                tempPaths.add(tempNodes);
+                for (SemanticNode orgNode : nodes) {
+                    if (orgNode.getInputText().contains("|")) {
+                        String[] inputs = orgNode.getInputText().split("\\|");
+                        List<List<List<SemanticNode>>> tempPathLists = Lists.newArrayList();
+                        for (String input : inputs) {
+                            List<List<SemanticNode>> newPaths = copyList(tempPaths);
+                            for (List<SemanticNode> semanticNodes : newPaths) {
+                                SemanticNode semanticNode = new SemanticNode();
+                                semanticNode.setInputText(input);
+                                semanticNodes.add(semanticNode);
+                            }
+                            tempPathLists.add(newPaths);
+                        }
+                        List<List<SemanticNode>> newTempPath = new ArrayList<>();
+                        for (List<List<SemanticNode>> newPaths : tempPathLists) {
+                            newTempPath.addAll(newPaths);
+                        }
+                        tempPaths = newTempPath;
+                    } else {
+                        for (List<SemanticNode> semanticNodes : tempPaths) {
+                            semanticNodes.add(orgNode);
+                        }
+                    }
+                }
+                paths.addAll(tempPaths);
+            } else {
+                paths.add(nodes);
+            }
         }
         return paths;
+    }
+
+    private List<List<SemanticNode>> copyList(List<List<SemanticNode>> paths) {
+        List<List<SemanticNode>> listsCopy = new ArrayList<>();
+        for (List<SemanticNode> path : paths) {
+            List<SemanticNode> listCopy = new ArrayList<>();
+            for (SemanticNode semanticNode : path) {
+                SemanticNode nodeCopy = new SemanticNode();
+                nodeCopy.setInputText(semanticNode.getInputText());
+                listCopy.add(nodeCopy);
+            }
+            listsCopy.add(listCopy);
+        }
+        return listsCopy;
     }
 
     private void buildInputPath(List<List<SemanticNode>> paths, List<SemanticNode> path, SemanticNode node) {
@@ -79,55 +126,5 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
             buildInputPath(paths, cPath, child);
         }
     }
-
-    public static void main(String[] args) {
-        FlowAnalysisTestParam param = new FlowAnalysisTestParam();
-        SemanticNode root = new SemanticNode();
-        List<SemanticNode> roots = new ArrayList<>();
-        roots.add(root);
-        param.setSemanticNodes(roots);
-        root.setInputText("我要洗碗");
-        List<SemanticNode> childs = new ArrayList<>();
-        root.setChildList(childs);
-
-        SemanticNode node1 = new SemanticNode();
-        childs.add(node1);
-        node1.setInputText("洗碗机小白");
-        List<SemanticNode> childs1 = new ArrayList<>();
-        node1.setChildList(childs1);
-
-        SemanticNode node2 = new SemanticNode();
-        childs1.add(node2);
-        node2.setInputText("帮我选择烘干效果好的程序");
-        List<SemanticNode> childs2 = new ArrayList<>();
-        node2.setChildList(childs2);
-
-        SemanticNode node3 = new SemanticNode();
-        childs1.add(node3);
-        node3.setInputText("混合洗");
-        List<SemanticNode> childs3 = new ArrayList<>();
-        node3.setChildList(childs3);
-
-        SemanticNode node4 = new SemanticNode();
-        childs2.add(node4);
-        node4.setInputText("日常洗");
-        List<SemanticNode> childs4 = new ArrayList<>();
-        node4.setChildList(childs4);
-
-        SemanticNode node5 = new SemanticNode();
-        childs3.add(node5);
-        childs4.add(node5);
-        node5.setInputText("洗碗机剩余时间");
-        List<SemanticNode> childs5 = new ArrayList<>();
-        node5.setChildList(childs5);
-
-        SemanticNode node6 = new SemanticNode();
-        childs5.add(node6);
-        node6.setInputText("洗碗机停止");
-
-
-        System.out.println(JSON.toJSONString(param, SerializerFeature.DisableCircularReferenceDetect));
-    }
-
 
 }
