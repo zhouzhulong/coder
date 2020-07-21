@@ -5,7 +5,8 @@ spring:
     multipart:
       enabled: true #开启文件上传
       max-file-size: 10MB #限制文件上传大小为10M
-
+  jackson:
+    default-property-inclusion: non_null
 mybatis:
   mapper-locations:
     - classpath:dao/*.xml
