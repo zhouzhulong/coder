@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.honey.coder.mapper.LogOperationMapper">
+  <resultMap id="BaseResultMap" type="com.honey.coder.model.LogOperation">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="op_user_account" jdbcType="VARCHAR" property="opUserAccount" />
+    <result column="op_user_name" jdbcType="VARCHAR" property="opUserName" />
+    <result column="op_category" jdbcType="VARCHAR" property="opCategory" />
+    <result column="op_sub_category" jdbcType="VARCHAR" property="opSubCategory" />
+    <result column="op_type" jdbcType="INTEGER" property="opType" />
+    <result column="op_desc" jdbcType="VARCHAR" property="opDesc" />
+    <result column="op_result" jdbcType="VARCHAR" property="opResult" />
+    <result column="op_method" jdbcType="VARCHAR" property="opMethod" />
+    <result column="op_cost" jdbcType="BIGINT" property="opCost" />
+    <result column="op_uri" jdbcType="VARCHAR" property="opUri" />
+    <result column="op_ip" jdbcType="VARCHAR" property="opIp" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.honey.coder.model.LogOperation">
+    <result column="op_param" jdbcType="LONGVARCHAR" property="opParam" />
+    <result column="op_extend" jdbcType="LONGVARCHAR" property="opExtend" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, op_user_account, op_user_name, op_category, op_sub_category, op_type, op_desc, 
+    op_result, op_method, op_cost, op_uri, op_ip, create_time
+  </sql>
+  <sql id="Blob_Column_List">
+    op_param, op_extend
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="com.honey.coder.model.LogOperationExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from log_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.honey.coder.model.LogOperationExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from log_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from log_operation
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from log_operation
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.honey.coder.model.LogOperationExample">
+    delete from log_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.honey.coder.model.LogOperation">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into log_operation (op_user_account, op_user_name, op_category, 
+      op_sub_category, op_type, op_desc, 
+      op_result, op_method, op_cost, 
+      op_uri, op_ip, create_time, 
+      op_param, op_extend)
+    values (#{opUserAccount,jdbcType=VARCHAR}, #{opUserName,jdbcType=VARCHAR}, #{opCategory,jdbcType=VARCHAR}, 
+      #{opSubCategory,jdbcType=VARCHAR}, #{opType,jdbcType=INTEGER}, #{opDesc,jdbcType=VARCHAR}, 
+      #{opResult,jdbcType=VARCHAR}, #{opMethod,jdbcType=VARCHAR}, #{opCost,jdbcType=BIGINT}, 
+      #{opUri,jdbcType=VARCHAR}, #{opIp,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{opParam,jdbcType=LONGVARCHAR}, #{opExtend,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.honey.coder.model.LogOperation">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into log_operation
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="opUserAccount != null">
+        op_user_account,
+      </if>
+      <if test="opUserName != null">
+        op_user_name,
+      </if>
+      <if test="opCategory != null">
+        op_category,
+      </if>
+      <if test="opSubCategory != null">
+        op_sub_category,
+      </if>
+      <if test="opType != null">
+        op_type,
+      </if>
+      <if test="opDesc != null">
+        op_desc,
+      </if>
+      <if test="opResult != null">
+        op_result,
+      </if>
+      <if test="opMethod != null">
+        op_method,
+      </if>
+      <if test="opCost != null">
+        op_cost,
+      </if>
+      <if test="opUri != null">
+        op_uri,
+      </if>
+      <if test="opIp != null">
+        op_ip,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="opParam != null">
+        op_param,
+      </if>
+      <if test="opExtend != null">
+        op_extend,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="opUserAccount != null">
+        #{opUserAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="opUserName != null">
+        #{opUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="opCategory != null">
+        #{opCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="opSubCategory != null">
+        #{opSubCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="opType != null">
+        #{opType,jdbcType=INTEGER},
+      </if>
+      <if test="opDesc != null">
+        #{opDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="opResult != null">
+        #{opResult,jdbcType=VARCHAR},
+      </if>
+      <if test="opMethod != null">
+        #{opMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="opCost != null">
+        #{opCost,jdbcType=BIGINT},
+      </if>
+      <if test="opUri != null">
+        #{opUri,jdbcType=VARCHAR},
+      </if>
+      <if test="opIp != null">
+        #{opIp,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="opParam != null">
+        #{opParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="opExtend != null">
+        #{opExtend,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.honey.coder.model.LogOperationExample" resultType="java.lang.Long">
+    select count(*) from log_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update log_operation
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.opUserAccount != null">
+        op_user_account = #{record.opUserAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opUserName != null">
+        op_user_name = #{record.opUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opCategory != null">
+        op_category = #{record.opCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opSubCategory != null">
+        op_sub_category = #{record.opSubCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opType != null">
+        op_type = #{record.opType,jdbcType=INTEGER},
+      </if>
+      <if test="record.opDesc != null">
+        op_desc = #{record.opDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opResult != null">
+        op_result = #{record.opResult,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opMethod != null">
+        op_method = #{record.opMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opCost != null">
+        op_cost = #{record.opCost,jdbcType=BIGINT},
+      </if>
+      <if test="record.opUri != null">
+        op_uri = #{record.opUri,jdbcType=VARCHAR},
+      </if>
+      <if test="record.opIp != null">
+        op_ip = #{record.opIp,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.opParam != null">
+        op_param = #{record.opParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.opExtend != null">
+        op_extend = #{record.opExtend,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update log_operation
+    set id = #{record.id,jdbcType=BIGINT},
+      op_user_account = #{record.opUserAccount,jdbcType=VARCHAR},
+      op_user_name = #{record.opUserName,jdbcType=VARCHAR},
+      op_category = #{record.opCategory,jdbcType=VARCHAR},
+      op_sub_category = #{record.opSubCategory,jdbcType=VARCHAR},
+      op_type = #{record.opType,jdbcType=INTEGER},
+      op_desc = #{record.opDesc,jdbcType=VARCHAR},
+      op_result = #{record.opResult,jdbcType=VARCHAR},
+      op_method = #{record.opMethod,jdbcType=VARCHAR},
+      op_cost = #{record.opCost,jdbcType=BIGINT},
+      op_uri = #{record.opUri,jdbcType=VARCHAR},
+      op_ip = #{record.opIp,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      op_param = #{record.opParam,jdbcType=LONGVARCHAR},
+      op_extend = #{record.opExtend,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update log_operation
+    set id = #{record.id,jdbcType=BIGINT},
+      op_user_account = #{record.opUserAccount,jdbcType=VARCHAR},
+      op_user_name = #{record.opUserName,jdbcType=VARCHAR},
+      op_category = #{record.opCategory,jdbcType=VARCHAR},
+      op_sub_category = #{record.opSubCategory,jdbcType=VARCHAR},
+      op_type = #{record.opType,jdbcType=INTEGER},
+      op_desc = #{record.opDesc,jdbcType=VARCHAR},
+      op_result = #{record.opResult,jdbcType=VARCHAR},
+      op_method = #{record.opMethod,jdbcType=VARCHAR},
+      op_cost = #{record.opCost,jdbcType=BIGINT},
+      op_uri = #{record.opUri,jdbcType=VARCHAR},
+      op_ip = #{record.opIp,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.honey.coder.model.LogOperation">
+    update log_operation
+    <set>
+      <if test="opUserAccount != null">
+        op_user_account = #{opUserAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="opUserName != null">
+        op_user_name = #{opUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="opCategory != null">
+        op_category = #{opCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="opSubCategory != null">
+        op_sub_category = #{opSubCategory,jdbcType=VARCHAR},
+      </if>
+      <if test="opType != null">
+        op_type = #{opType,jdbcType=INTEGER},
+      </if>
+      <if test="opDesc != null">
+        op_desc = #{opDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="opResult != null">
+        op_result = #{opResult,jdbcType=VARCHAR},
+      </if>
+      <if test="opMethod != null">
+        op_method = #{opMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="opCost != null">
+        op_cost = #{opCost,jdbcType=BIGINT},
+      </if>
+      <if test="opUri != null">
+        op_uri = #{opUri,jdbcType=VARCHAR},
+      </if>
+      <if test="opIp != null">
+        op_ip = #{opIp,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="opParam != null">
+        op_param = #{opParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="opExtend != null">
+        op_extend = #{opExtend,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.honey.coder.model.LogOperation">
+    update log_operation
+    set op_user_account = #{opUserAccount,jdbcType=VARCHAR},
+      op_user_name = #{opUserName,jdbcType=VARCHAR},
+      op_category = #{opCategory,jdbcType=VARCHAR},
+      op_sub_category = #{opSubCategory,jdbcType=VARCHAR},
+      op_type = #{opType,jdbcType=INTEGER},
+      op_desc = #{opDesc,jdbcType=VARCHAR},
+      op_result = #{opResult,jdbcType=VARCHAR},
+      op_method = #{opMethod,jdbcType=VARCHAR},
+      op_cost = #{opCost,jdbcType=BIGINT},
+      op_uri = #{opUri,jdbcType=VARCHAR},
+      op_ip = #{opIp,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      op_param = #{opParam,jdbcType=LONGVARCHAR},
+      op_extend = #{opExtend,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.honey.coder.model.LogOperation">
+    update log_operation
+    set op_user_account = #{opUserAccount,jdbcType=VARCHAR},
+      op_user_name = #{opUserName,jdbcType=VARCHAR},
+      op_category = #{opCategory,jdbcType=VARCHAR},
+      op_sub_category = #{opSubCategory,jdbcType=VARCHAR},
+      op_type = #{opType,jdbcType=INTEGER},
+      op_desc = #{opDesc,jdbcType=VARCHAR},
+      op_result = #{opResult,jdbcType=VARCHAR},
+      op_method = #{opMethod,jdbcType=VARCHAR},
+      op_cost = #{opCost,jdbcType=BIGINT},
+      op_uri = #{opUri,jdbcType=VARCHAR},
+      op_ip = #{opIp,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

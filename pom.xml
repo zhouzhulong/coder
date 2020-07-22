@@ -14,6 +14,7 @@
         <module>coding-common</module>
         <module>coding-domain</module>
         <module>coding-web</module>
+        <module>coding-mbg</module>
     </modules>
 
 
