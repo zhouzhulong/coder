@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
 
-    private String flowAnalysisUrl = "https://solution.home-connect.cn:54443/platform/access/datahub/flowAnalysis";
+    private String flowAnalysisUrl = "https://";
 
     @Override
     public FlowAnalysisTestResult flowAnalysis(FlowAnalysisTestParam param) {
