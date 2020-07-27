@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author zlzhou
  */
 @Controller
-@Api(tags = "FlowAnalysisTestController")
+@Api(tags = "BSH流程测试工具")
 @RequestMapping("/flowanalysis")
 public class FlowAnalysisTestController {
 

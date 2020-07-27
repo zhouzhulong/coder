@@ -3,8 +3,10 @@ package com.honey.coder.component;
 import com.alibaba.fastjson.JSON;
 import com.honey.coder.annotation.OperationLog;
 import com.honey.coder.annotation.OperationLogTypeEnum;
+import com.honey.coder.bo.BeanDiff;
 import com.honey.coder.model.LogOperation;
 import com.honey.coder.service.OperationLogService;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,6 +24,7 @@ import java.lang.reflect.Method;
  */
 @Aspect
 @Component
+@Slf4j
 public class OperationLogAspect {
 
     @Autowired
@@ -57,6 +60,10 @@ public class OperationLogAspect {
         long cost = (end - start);
         operationLog.setOpResult(JSON.toJSONString(result));
         operationLog.setOpCost(cost);
+        BeanDiff beanDiff = (BeanDiff) request.getAttribute("beanDiff");
+        if (beanDiff != null) {
+            operationLog.setOpExtend(JSON.toJSONString(beanDiff));
+        }
         operationLogService.insert(operationLog);
         return result;
     }
