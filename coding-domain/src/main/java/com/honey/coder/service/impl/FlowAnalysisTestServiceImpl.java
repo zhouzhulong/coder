@@ -22,15 +22,18 @@ import java.util.List;
 @Service
 public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
 
-    private String flowAnalysisUrl = "https://";
+    private String flowAnalysisUrl = "https://solution.home-connect.cn:54443/platform/access/datahub/flowAnalysis";
 
     @Override
     public FlowAnalysisTestResult flowAnalysis(FlowAnalysisTestParam param) {
         List<List<SemanticNode>> paths = buildInputPath(param.getSemanticNodes());
         List<List<SemanticNode>> results = new ArrayList<>();
+        int count = 1;
         for (List<SemanticNode> inputs : paths) {
             List<SemanticNode> result = new ArrayList<>();
             results.add(result);
+            log.info("\n");
+            log.info("flowAnalysis 交互示例 " + count++);
             for (SemanticNode node : inputs) {
                 param.setInput_text(node.getInputText());
                 log.info("flowAnalysis inputText=" + node.getInputText());
@@ -44,6 +47,9 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
                     outputText.append(item.getString("content"));
                 }
                 log.info("flowAnalysis outputText=" + outputText.toString());
+                if(isEnd){
+                    break;
+                }
                 node.setOutputText(outputText.toString());
                 node.setChildList(null);
                 result.add(node);
@@ -52,6 +58,19 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
         FlowAnalysisTestResult flowAnalysisTestResult = new FlowAnalysisTestResult();
         flowAnalysisTestResult.setResults(results);
         return flowAnalysisTestResult;
+    }
+
+    private void buildInputPath(List<List<SemanticNode>> paths, List<SemanticNode> path, SemanticNode node) {
+        if (node.childList == null || node.childList.size() <= 0) {
+            paths.add(path);
+            return;
+        }
+        for (int i = 0; i < node.childList.size(); i++) {
+            SemanticNode child = node.childList.get(i);
+            List<SemanticNode> cPath = new ArrayList<>(path);
+            cPath.add(child);
+            buildInputPath(paths, cPath, child);
+        }
     }
 
     private List<List<SemanticNode>> buildInputPath(List<SemanticNode> roots) {
@@ -114,17 +133,5 @@ public class FlowAnalysisTestServiceImpl implements FlowAnalysisTestService {
         return listsCopy;
     }
 
-    private void buildInputPath(List<List<SemanticNode>> paths, List<SemanticNode> path, SemanticNode node) {
-        if (node.childList == null || node.childList.size() <= 0) {
-            paths.add(path);
-            return;
-        }
-        for (int i = 0; i < node.childList.size(); i++) {
-            SemanticNode child = node.childList.get(i);
-            List<SemanticNode> cPath = new ArrayList<>(path);
-            cPath.add(child);
-            buildInputPath(paths, cPath, child);
-        }
-    }
 
 }
